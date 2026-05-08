@@ -1,6 +1,8 @@
 const router = require('express').Router()
 const User = require('../models/User')
 const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
+
 router.get('/', async (req, res) => {//get all users
     try {
         const users = await User.find().select('-password')//to not show passwords
@@ -60,9 +62,27 @@ router.post('/login', async (req, res) => {
                 error: "Invalid email or password"
             })
         }
+        const token = jwt.sign(
+
+            {
+                id: user._id,
+                role: user.role
+            },
+
+            process.env.JWT_SECRET,
+
+            {
+                expiresIn: "7d"
+            }
+
+        )
 
         res.json({
+
             message: "Login successful",
+
+            token,
+
             user: {
                 id: user._id,
                 name: user.name,
@@ -70,6 +90,7 @@ router.post('/login', async (req, res) => {
                 uni: user.uni,
                 role: user.role
             }
+
         })
 
     } catch (err) {
