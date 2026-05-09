@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
-
+const auth = require("../middleware/auth")
 // GET all products
 router.get("/", async (req, res) => {
     const products = await Product.find();
@@ -41,11 +41,14 @@ router.get("/:id", async (req, res) => {//get by id
     }
 
 })
-router.post("/", async (req, res) => {//create product
+router.post("/", auth, async (req, res) => {//create product
 
     try {
 
-        const product = new Product(req.body)
+        const product = new Product({
+            ...req.body,
+            user: req.user.id
+        })
 
         await product.save()
 
@@ -60,7 +63,7 @@ router.post("/", async (req, res) => {//create product
     }
 
 })
-router.put("/:id", async (req, res) => {//update
+router.put("/:id", auth, async (req, res) => {//update
 
     try {
 
@@ -87,7 +90,7 @@ router.put("/:id", async (req, res) => {//update
     }
 
 })
-router.delete("/:id", async (req, res) => {//delete by id
+router.delete("/:id", auth, async (req, res) => {//delete by id
 
     try {
 

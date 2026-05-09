@@ -13,7 +13,7 @@ app.use('/api/ads',     require('./routes/ads'))
 app.use('/api/reports', require('./routes/reports'))
 app.use('/api/chats', require('./routes/chats'))
 app.use('/api/admin', require('./routes/admin'))
-
+app.use('/api/products', require('./routes/products'))
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log('mongoDB connected')
