@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
     name: {type: String,required: true},
     birthDate: {type: Date , required: true},
     location: {type: String,required: true},
+    faculty: {type: String, required: true},
     uni: {type: String,required: true},
     email: {type: String, required: true, unique: true, lowercase: true, trim: true},//no duplicate emails automatically lowercase removes extra spaces
     password: {type: String, required: true},
