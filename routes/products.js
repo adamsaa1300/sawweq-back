@@ -2,6 +2,20 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
 const auth = require("../middleware/auth")
+const multer = require("multer")
+const path = require("path")
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/")
+    },
+
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname))
+    }
+})
+
+const upload = multer({ storage })
 
 // GET all
 /**
@@ -111,13 +125,20 @@ router.get("/:id", async (req, res) => {//get by id
  *       201:
  *         description: Product created successfully
  */
-router.post("/", auth, async (req, res) => {//create product
+router.post("/", auth, upload.array("images", 8), async (req, res) => {//create product
     try {
+        const imagePaths = req.files.map(
+            file => `http://localhost:5000/uploads/${file.filename}`
+        )
+
         const product = new Product({
             ...req.body,
-            user: req.user.id
+            user: req.user.id,
+            images: imagePaths
         })
+
         await product.save()
+
         res.status(201).json(product)
     } catch (err) {
         res.status(400).json({

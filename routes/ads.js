@@ -1,5 +1,20 @@
 const router = require('express').Router()
 const Ad = require('../models/Ad')
+const multer = require("multer")
+const path = require("path")
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/")
+    },
+
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname))
+    }
+})
+
+const upload = multer({ storage })
+
 
 router.get('/', async (req, res) => {
     try {
@@ -31,10 +46,19 @@ router.get('/weekly', async (req, res) => {
     }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', upload.array("images", 8), async (req, res) => {
     try {
-        const ad = new Ad(req.body)
+        const imagePaths = req.files.map(
+            file => `http://localhost:5000/uploads/${file.filename}`
+        )
+
+        const ad = new Ad({
+            ...req.body,
+            images: imagePaths
+        })
+
         await ad.save()
+
         res.status(201).json(ad)
     } catch (err) {
         res.status(500).json({ error: err.message })
