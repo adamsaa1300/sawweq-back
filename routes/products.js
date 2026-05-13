@@ -134,6 +134,7 @@ router.post("/", auth, upload.array("images", 8), async (req, res) => {//create 
         const product = new Product({
             ...req.body,
             user: req.user.id,
+            userName: req.body.userName,
             images: imagePaths
         })
 
