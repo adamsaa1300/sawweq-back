@@ -6,16 +6,17 @@ const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
 console.log(process.env.MONGO_URI);
 const app = express()
+const path = require('path');
 app.use(cors())//allows frontend and backend communication between different ports.
 app.use(express.json())//Allows Express to read JSON data sent from frontend requests.
 
 app.use('/api/users',   require('./routes/users'))
-app.use('/api/ads',     require('./routes/ads'))
 app.use('/api/reports', require('./routes/reports'))
 app.use('/api/chats', require('./routes/chats'))
 app.use('/api/admin', require('./routes/admin'))
 app.use('/api/products', require('./routes/products'))
 app.use('/api/ai', require('./routes/aiRoute'))
+app.use('/api/ads', require('./routes/create_ads'))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 const options = {
     definition: {
