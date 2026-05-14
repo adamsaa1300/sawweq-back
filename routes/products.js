@@ -63,7 +63,43 @@ router.get("/search", async (req, res) => {
     res.json(products);
 });
 
-
+/**
+ * @swagger
+ * /api/products/count/{userId}:
+ * get:
+ * summary: Get total number of ads created by a specific user
+ * tags: [Ads]
+ * parameters:
+ * - in: path
+ * name: userId
+ * required: true
+ * schema:
+ * type: string
+ * description: The ID of the user to count their ads
+ * responses:
+ * 200:
+ * description: Total count retrieved successfully
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * properties:
+ * count:
+ * type: integer
+ * example: 5
+ * 500:
+ * description: Server error
+ */
+router.get("/count/:userId", async (req, res) => {
+  try {
+    const count = await Product.countDocuments({
+      user: req.params.userId,
+    });
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 /**
  * @swagger
  * /api/products/{id}:
@@ -129,28 +165,24 @@ router.get("/:id", async (req, res) => {//get by id
  *       201:
  *         description: Product created successfully
  */
-router.post("/", auth, upload.array("images", 8), async (req, res) => {//create product
+router.post("/", auth, upload.array("images", 8), async (req, res) => {
     try {
-        const imagePaths = req.files.map(
-            file => file.path
-        )
-
+        const imagePaths = req.files ? req.files.map(file => file.path) : [];
         const product = new Product({
             ...req.body,
             user: req.user.id,
             userName: req.body.userName,
-            images: imagePaths
-        })
-
-        await product.save()
-
-        res.status(201).json(product)
+            images: imagePaths,
+            status: "active"
+        });
+        await product.save();
+        res.status(201).json(product);
     } catch (err) {
         res.status(400).json({
             error: err.message
-        })
+        });
     }
-})
+});
 
 
 /**
