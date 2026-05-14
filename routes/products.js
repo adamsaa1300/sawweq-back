@@ -3,20 +3,24 @@ const router = express.Router();
 const Product = require("../models/Product");
 const auth = require("../middleware/auth")
 const multer = require("multer")
-const path = require("path")
+const cloudinary = require("cloudinary").v2
+const { CloudinaryStorage } = require("multer-storage-cloudinary")
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/")
-    },
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname))
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: "sawweq_products",
+        allowed_formats: ["jpg", "png", "jpeg", "webp"]
     }
 })
 
 const upload = multer({ storage })
-
 // GET all
 /**
  * @swagger
@@ -128,7 +132,7 @@ router.get("/:id", async (req, res) => {//get by id
 router.post("/", auth, upload.array("images", 8), async (req, res) => {//create product
     try {
         const imagePaths = req.files.map(
-            file => `http://localhost:5000/uploads/${file.filename}`
+            file => file.path
         )
 
         const product = new Product({

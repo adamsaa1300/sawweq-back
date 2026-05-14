@@ -347,6 +347,30 @@ router.delete('/:id', async (req, res) => {
     }
 
 })
+
+/**
+ * @swagger
+ * /api/users/reset-password:
+ *   put:
+ *     summary: Reset user password
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *       404:
+ *         description: User not found
+ */
 router.put("/reset-password", async (req, res) => {
 
     try {
