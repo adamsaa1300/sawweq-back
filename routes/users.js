@@ -347,30 +347,6 @@ router.delete('/:id', async (req, res) => {
     }
 
 })
-
-/**
- * @swagger
- * /api/users/reset-password:
- *   put:
- *     summary: Reset user password
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               newPassword:
- *                 type: string
- *     responses:
- *       200:
- *         description: Password updated successfully
- *       404:
- *         description: User not found
- */
 router.put("/reset-password", async (req, res) => {
 
     try {
@@ -396,69 +372,6 @@ router.put("/reset-password", async (req, res) => {
 
         res.json({
             message: "Password updated successfully"
-        });
-
-    } catch (err) {
-
-        res.status(500).json({
-            error: err.message
-        });
-
-    }
-
-});
-
-router.post('/google-login', async (req, res) => {
-
-    try {
-
-        const { name, email } = req.body;
-
-        let user = await User.findOne({ email });
-
-        if (!user) {
-
-            user = new User({
-                name,
-                email,
-                password: "google-auth-user",
-                birthDate: new Date(),
-                location: "Unknown",
-                faculty: "Unknown",
-                uni: "Unknown",
-                role: "user"
-            });
-
-            await user.save();
-
-        }
-
-        const token = jwt.sign(
-
-            {
-                id: user._id,
-                role: user.role
-            },
-
-            process.env.JWT_SECRET,
-
-            {
-                expiresIn: "7d"
-            }
-
-        );
-
-        res.json({
-
-            token,
-
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
-
         });
 
     } catch (err) {

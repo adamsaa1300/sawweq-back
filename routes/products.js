@@ -234,7 +234,6 @@ router.delete("/:id", auth, async (req, res) => {//delete by id
     }
 })
 
-
 /**
  * @swagger
  * /api/products:
@@ -257,4 +256,5 @@ router.delete("/", async (req, res) => {//delete all
         })
     }
 })
+
 module.exports = router;

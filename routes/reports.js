@@ -9,15 +9,56 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: err.message })
     }
 })
-
+/**
+ * @swagger
+ * /api/reports:
+ *   post:
+ *     summary: Create a new report
+ *     tags: [Reports]
+ *
+ *     requestBody:
+ *       required: true
+ *
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *
+ *             properties:
+ *
+ *               productId:
+ *                 type: string
+ *
+ *               type:
+ *                 type: string
+ *
+ *               reason:
+ *                 type: string
+ *
+ *     responses:
+ *       201:
+ *         description: Report created successfully
+ *
+ *       400:
+ *         description: Validation error
+ */
 router.post('/', async (req, res) => {
     try {
         const report = new Report(req.body)
+
         await report.save()
+
+        console.log("REPORT SAVED")
+
         res.status(201).json(report)
+
     } catch (err) {
-        res.status(400).json({ error: err.message })
+
+    res.status(400).json({
+        error: err.message
+    })
     }
+
 })
 
 router.put('/:id', async (req, res) => {
