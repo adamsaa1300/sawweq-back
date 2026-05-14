@@ -63,4 +63,22 @@ router.post('/', upload.array('images', 8), async (req, res) => {
     }
 });
 
+router.get('/user/:email', async (req, res) => {
+    try {
+
+        const ads = await Ad.find({
+            user: req.params.email
+        });
+
+        res.json(ads);
+
+    } catch (err) {
+
+        res.status(500).json({
+            error: err.message
+        });
+
+    }
+});
+
 module.exports = router;
