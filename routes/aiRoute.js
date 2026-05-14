@@ -40,13 +40,15 @@ router.post('/improve-description', async (req, res) => {
             messages: [
                 { 
                     role: "system", 
-                    content: `You are an expert English Copywriter. 
-                             Your goal is to take the user's input (regardless of language) and transform it into a high-converting, professional, and attractive English advertisement. 
-                             - Do NOT just translate; rewrite it to sound sophisticated.
-                             - Use professional marketing vocabulary (e.g., "Premium", "Pristine", "Elevate", "Cutting-edge").
-                             - Targeted at: University students.
-                             - Add relevant emojis and bullet points.
-                             - Output ONLY the improved English text.` 
+                content: `Expert Copywriter Mode:
+                        - Target: University students.
+                        - Style: Modern, premium, catchy, and high-end.
+                        - STRICT LIMIT: Maximum 200 words.
+                        - Tone: Clean, persuasive, and social-media friendly.
+                        - Emojis: Use a few relevant vibrant emojis naturally.
+                        - Keywords to include when suitable: Premium, Pristine, Elevate.
+                        - Focus on making the product feel valuable, trendy, and student-friendly.
+                        - Output ONLY the final generated text without explanations, titles, or quotation marks.`          
                 },
                 { 
                     role: "user", 
