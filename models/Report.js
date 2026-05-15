@@ -1,11 +1,15 @@
 const mongoose = require('mongoose')
 
+/**
+ * Report Schema
+ * Represents a report submitted against an ad, user, or chat
+ */
 const reportSchema = new mongoose.Schema({
-    tag:    { type: String },
-    title:  { type: String, required: true },
-    desc:   { type: String },
-    type:   { type: String },
-    status: { type: String, default: 'pending' },
+    tag:    { type: String },                           // ad | user | chat
+    title:  { type: String, required: true },           // report title
+    desc:   { type: String },                           // report description
+    type:   { type: String },                           // report type
+    status: { type: String, default: 'pending' },       // pending | resolved | rejected
 }, { timestamps: true })
 
 module.exports = mongoose.model('Report', reportSchema)
