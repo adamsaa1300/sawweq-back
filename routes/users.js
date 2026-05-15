@@ -1,5 +1,7 @@
 const router = require('express').Router()
 const User = require('../models/User')
+const bcrypt = require("bcryptjs")//to have encrypted hash passwords
+const jwt = require("jsonwebtoken")
 
 /**
  * @swagger
@@ -17,7 +19,7 @@ const User = require('../models/User')
  */
 router.get('/', async (req, res) => {
     try {
-        const users = await User.find()
+        const users = await User.find().select('-password')//to not show passwords
         res.json(users)
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch users' })
@@ -70,9 +72,43 @@ router.post('/', async (req, res) => {
 
         const user = new User({ name, email, uni, status })
         await user.save()
-        res.status(201).json(user)
+
+        const token = jwt.sign(
+
+            {
+                id: user._id,
+                role: user.role
+            },
+
+            process.env.JWT_SECRET,
+
+            {
+                expiresIn: "7d"
+            }
+
+        )
+
+        res.status(201).json({
+
+            message: "User created successfully",
+
+            token,
+
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                faculty: user.faculty,
+                uni: user.uni,
+                role: user.role
+            }
+
+        })
+
     } catch (err) {
-        res.status(400).json({ error: err.message })
+        res.status(500).json({
+            error: err.message
+        })
     }
 })
 
@@ -120,7 +156,9 @@ router.put('/:id', async (req, res) => {
         const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true })
         res.json(updated)
     } catch (err) {
-        res.status(400).json({ error: err.message })
+        res.status(500).json({
+            error: err.message
+        })
     }
 })
 
@@ -154,8 +192,86 @@ router.delete('/:id', async (req, res) => {
         await User.findByIdAndDelete(req.params.id)
         res.json({ message: 'User deleted successfully' })
     } catch (err) {
-        res.status(400).json({ error: err.message })
+        res.status(400).json({
+            error: err.message
+        })
     }
+
 })
 
+
+
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ */
+router.delete('/:id', async (req, res) => {
+
+    try {
+
+        await User.findByIdAndDelete(req.params.id)
+
+        res.json({ message: 'deleted' })
+
+    } catch (err) {
+
+        res.status(400).json({
+            error: err.message
+        })
+
+    }
+
+})
+router.put("/reset-password", async (req, res) => {
+
+    try {
+
+        const { email, newPassword } = req.body;
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(
+            newPassword,
+            10
+        );
+
+        user.password = hashedPassword;
+
+        await user.save();
+
+        res.json({
+            message: "Password updated successfully"
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            error: err.message
+        });
+
+    }
+
+});
 module.exports = router

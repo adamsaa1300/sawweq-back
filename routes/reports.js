@@ -23,7 +23,6 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch reports' })
     }
 })
-
 /**
  * @swagger
  * /api/reports:
@@ -67,10 +66,18 @@ router.post('/', async (req, res) => {
 
         const report = new Report({ title, desc, tag, status: 'pending' })
         await report.save()
+
+        console.log("REPORT SAVED")
+
         res.status(201).json(report)
+
     } catch (err) {
-        res.status(400).json({ error: err.message })
+
+    res.status(400).json({
+        error: err.message
+    })
     }
+
 })
 
 /**

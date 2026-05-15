@@ -1,5 +1,20 @@
 const router = require('express').Router()
 const Ad = require('../models/Ad')
+const multer = require("multer")
+const path = require("path")
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/")
+    },
+
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname))
+    }
+})
+
+const upload = multer({ storage })
+
 
 /**
  * @swagger
@@ -106,6 +121,7 @@ router.post('/', async (req, res) => {
 
         const ad = new Ad({ title, user, category, price, status: req.body.status || 'active' })
         await ad.save()
+
         res.status(201).json(ad)
     } catch (err) {
         res.status(400).json({ error: err.message })
