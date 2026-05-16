@@ -3,33 +3,37 @@ const User = require('../models/User')
 const bcrypt = require("bcryptjs")//to have encrypted hash passwords
 const jwt = require("jsonwebtoken")
 
-
 /**
  * @swagger
  * /api/users:
  *   get:
  *     summary: Get all users
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all users
+ *       401:
+ *         description: Unauthorized
  */
-router.get('/', async (req, res) => {//get all users //used in home page & search page
+router.get('/', async (req, res) => {//get all users
     try {
         const users = await User.find().select('-password')//to not show passwords
         res.json(users)
     } catch (err) {
-        res.status(500).json({ error: err.message })
+        res.status(500).json({ error: 'Failed to fetch users' })
     }
 })
-
 
 /**
  * @swagger
  * /api/users:
  *   post:
- *     summary: Register new user
+ *     summary: Create new user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -39,21 +43,15 @@ router.get('/', async (req, res) => {//get all users //used in home page & searc
  *             properties:
  *               name:
  *                 type: string
- *               birthDate:
- *                 type: string
- *               location:
- *                 type: string
- *               faculty:
+ *               email:
  *                 type: string
  *               uni:
  *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
  *     responses:
  *       201:
- *         description: User created successfully
+ *         description: User created
+ *       400:
+ *         description: Validation error
  */
 router.post('/', async (req, res) => {//create a user //used in register
 //Duplicate email prevention &Password hashing
@@ -100,9 +98,6 @@ router.post('/', async (req, res) => {//create a user //used in register
         })
     }
 })
-
-
-
 /**
  * @swagger
  * /api/users/login:
@@ -178,7 +173,7 @@ router.post('/login', async (req, res) => {//used in log in page //email and pas
 /**
  * @swagger
  * /api/users/{id}:
- *   get:
+ *   put:
  *     summary: Get user by ID
  *     tags: [Users]
  *     parameters:
@@ -194,73 +189,26 @@ router.post('/login', async (req, res) => {//used in log in page //email and pas
  *       404:
  *         description: User not found
  */
-router.get('/:id', async (req, res) => {//get by id
+router.put('/:id', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('-password')
-
+        const user = await User.findById(req.params.id)
         if (!user) {
-            return res.status(404).json({
-                error: "User not found"
-            })
+            return res.status(404).json({ error: 'User not found' })
         }
 
-        res.json(user)
+        const allowedStatus = ['active', 'suspended', 'banned']
+        if (req.body.status && !allowedStatus.includes(req.body.status)) {
+            return res.status(400).json({ error: 'Invalid status value' })
+        }
 
+        const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        res.json(updated)
     } catch (err) {
         res.status(500).json({
             error: err.message
         })
     }
 })
-
-
-
-
-/**
- * @swagger
- * /api/users/{id}:
- *   put:
- *     summary: Update user
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: User ID
- *     responses:
- *       200:
- *         description: User updated successfully
- *       404:
- *         description: User not found
- */
-router.put('/:id', async (req, res) => {//update user
-
-    try {
-
-        if (req.body.password) {
-            req.body.password = await bcrypt.hash(req.body.password, 10)
-        }
-
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        ).select('-password')
-
-        res.json(user)
-
-    } catch (err) {
-        res.status(400).json({
-            error: err.message
-        })
-    }
-
-})
-
-
-
 
 /**
  * @swagger
@@ -268,70 +216,36 @@ router.put('/:id', async (req, res) => {//update user
  *   delete:
  *     summary: Delete user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: User ID
  *     responses:
  *       200:
- *         description: User deleted successfully
+ *         description: User deleted
  *       404:
  *         description: User not found
  */
 router.delete('/:id', async (req, res) => {
-
     try {
+        const user = await User.findById(req.params.id)
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' })
+        }
 
         await User.findByIdAndDelete(req.params.id)
-
-        res.json({ message: 'deleted' })
-
+        res.json({ message: 'User deleted successfully' })
     } catch (err) {
-
         res.status(400).json({
             error: err.message
         })
-
     }
 
 })
-router.put("/reset-password", async (req, res) => {
 
-    try {
 
-        const { email, newPassword } = req.body;
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(404).json({
-                error: "User not found"
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(
-            newPassword,
-            10
-        );
-
-        user.password = hashedPassword;
-
-        await user.save();
-
-        res.json({
-            message: "Password updated successfully"
-        });
-
-    } catch (err) {
-
-        res.status(500).json({
-            error: err.message
-        });
-
-    }
-
-});
 module.exports = router
