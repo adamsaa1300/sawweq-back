@@ -14,7 +14,7 @@ const jwt = require("jsonwebtoken")
  *       200:
  *         description: List of all users
  */
-router.get('/', async (req, res) => {//get all users
+router.get('/', async (req, res) => {//get all users //used in home page & search page
     try {
         const users = await User.find().select('-password')//to not show passwords
         res.json(users)
@@ -55,60 +55,36 @@ router.get('/', async (req, res) => {//get all users
  *       201:
  *         description: User created successfully
  */
-router.post('/', async (req, res) => {//create a user
+router.post('/', async (req, res) => {//create a user //used in register
 //Duplicate email prevention &Password hashing
     // & JWT generation & Automatic login after registration
     try {
-
         const {
             name, birthDate, location, faculty, uni, email, password, role
         } = req.body
-
         const existingUser = await User.findOne({ email })
-
         if (existingUser) {
             return res.status(400).json({
                 error: "Email already exists"
             })
         }
-
         const hashedPassword = await bcrypt.hash(password, 10)
 //hashing password so passwords become encrypted duplicate emails prevented cleaner register logic safer backend
-
-        const user = new User({
-            name,
-            birthDate,
-            location,
-            faculty,
-            uni,
-            email,
-            password: hashedPassword,
-            role
-        })
-
+        const user = new User({name, birthDate, location, faculty, uni, email, password: hashedPassword, role})
         await user.save()
-
         const token = jwt.sign(
-
             {
                 id: user._id,
                 role: user.role
             },
-
             process.env.JWT_SECRET,
-
             {
-                expiresIn: "7d"
+                expiresIn: "5h"
             }
-
         )
-
         res.status(201).json({
-
             message: "User created successfully",
-
             token,
-
             user: {
                 id: user._id,
                 name: user.name,
@@ -117,9 +93,7 @@ router.post('/', async (req, res) => {//create a user
                 uni: user.uni,
                 role: user.role
             }
-
         })
-
     } catch (err) {
         res.status(500).json({
             error: err.message
@@ -152,54 +126,36 @@ router.post('/', async (req, res) => {//create a user
  *       400:
  *         description: Invalid credentials
  */
-router.post('/login', async (req, res) => {//email and passwor validation & JWT token generaion & role detection
+router.post('/login', async (req, res) => {//used in log in page //email and passwor validation & JWT token generaion & role detection
     try {
-
         const { email, password } = req.body
-
         const user = await User.findOne({ email })
-
         if (!user) {
-
             return res.status(400).json({
                 field: "email",
                 error: "Email not found"
             })
-
         }
-
         const isMatch = await bcrypt.compare(password, user.password)//Checks if entered password matches stored encrypted password.
-
         if (!isMatch) {
-
             return res.status(400).json({
                 field: "password",
                 error: "Wrong password"
             })
-
         }
-
         const token = jwt.sign(
-
             {
                 id: user._id,
                 role: user.role
             },
-
             process.env.JWT_SECRET,
-
             {
-                expiresIn: "7d"
+                expiresIn: "5h"
             }
-
         )
-
-        res.json({
-
+        res.status(201).json({
             message: "Login successful",
-
             token,
-
             user: {
                 id: user._id,
                 name: user.name,
@@ -208,17 +164,12 @@ router.post('/login', async (req, res) => {//email and passwor validation & JWT 
                 uni: user.uni,
                 role: user.role
             }
-
         })
-
     } catch (err) {
-
         res.status(500).json({
             error: err.message
         })
-
     }
-
 })
 
 

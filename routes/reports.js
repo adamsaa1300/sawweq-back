@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
  *       400:
  *         description: Validation error
  */
-router.post('/', async (req, res) => {
+router.post('/', async (req, res) => {//used in cards ptoducts
     try {
         const report = new Report(req.body)
 
