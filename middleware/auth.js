@@ -1,25 +1,29 @@
-//This middleware protects private routes.
-const jwt = require("jsonwebtoken")
-//When frontend sends:TOKEN the middleware:checks token & verifies it &extracts user info &allows access
-// OR: blocks access if invalid/not logged in.
+const jwt = require('jsonwebtoken')
+
+/**
+ * Protect Middleware
+ * Verifies JWT token before allowing access to protected routes
+ * When frontend sends token, middleware checks and verifies it
+ * then extracts user info and allows access, or blocks if invalid
+ */
 module.exports = (req, res, next) => {
     try {
-        const token = req.header("Authorization")
+        const token = req.header('Authorization')
+
         if (!token) {
-            return res.status(401).json({
-                error: "Access denied"
-            })
+            return res.status(401).json({ error: 'Access denied' })
         }
-        const verified = jwt.verify(//Verifies token authenticity.
-            token.replace("Bearer ", ""),
+
+        // verify token and extract user info
+        const verified = jwt.verify(
+            token.replace('Bearer ', ''),
             process.env.JWT_SECRET
         )
-        req.user = verified//Stores logged-in user information inside request object.
-        next()
-    } catch (err) {
-        res.status(401).json({
-            error: "Invalid token"
-        })
-    }
 
+        req.user = verified // store logged-in user info in request
+        next()
+
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid token' })
+    }
 }

@@ -1,23 +1,17 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-require('dotenv').config()
+const path = require('path')
+const protect = require('./middleware/auth')
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
-console.log(process.env.MONGO_URI);
-const app = express()
-const path = require('path');
-app.use(cors())//allows frontend and backend communication between different ports.
-app.use(express.json())//Allows Express to read JSON data sent from frontend requests.
+require('dotenv').config()
 
-app.use('/api/users',   require('./routes/users'))
-app.use('/api/reports', require('./routes/reports'))
-app.use('/api/chats', require('./routes/chats'))
-app.use('/api/admin', require('./routes/admin'))
-app.use('/api/products', require('./routes/products'))
-app.use('/api/ai', require('./routes/aiRoute'))
-app.use('/api/ads', require('./routes/create_ads'))
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+const app = express()
+app.use(cors())
+app.use(express.json())
+
+// swagger config
 const options = {
     definition: {
         openapi: '3.0.0',
@@ -29,23 +23,31 @@ const options = {
         components: {
             securitySchemes: {
                 bearerAuth: {
-                    type: "http",
-                    scheme: "bearer",
-                    bearerFormat: "JWT"
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT'
                 }
             }
         },
     },
     apis: ['./routes/*.js']
 }
-
 const specs = swaggerJsdoc(options)
 
-app.use(
-    '/api-docs',
-    swaggerUi.serve,
-    swaggerUi.setup(specs)
-)
+// public routes
+
+app.use('/api/products', require('./routes/products'))
+app.use('/api/ai',       require('./routes/aiRoute'))
+app.use('/uploads',      express.static(path.join(__dirname, 'uploads')))
+app.use('/api-docs',     swaggerUi.serve, swaggerUi.setup(specs))
+
+// protected routes
+app.use('/api/users', require('./routes/users'))
+app.use('/api/ads',      protect, require('./routes/create_ads'))
+app.use('/api/reports', require('./routes/reports'))
+app.use('/api/chats',    protect, require('./routes/chats'))
+app.use('/api/admin',    protect, require('./routes/admin'))
+
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log('mongoDB connected')

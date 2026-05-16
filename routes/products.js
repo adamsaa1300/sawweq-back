@@ -21,7 +21,7 @@ const storage = new CloudinaryStorage({
 })
 
 const upload = multer({ storage })
-// GET all
+// GET all//for home page &search page + filtering in the front
 /**
  * @swagger
  * /api/products:
@@ -34,32 +34,6 @@ const upload = multer({ storage })
  */
 router.get("/", async (req, res) => {
     const products = await Product.find();
-    res.json(products);
-});
-
-// SEARCH products
-/**
- * @swagger
- * /api/products/search:
- *   get:
- *     summary: Search products
- *     tags: [Products]
- *     parameters:
- *       - in: query
- *         name: q
- *         schema:
- *           type: string
- *         required: true
- *         description: Search keyword
- *     responses:
- *       200:
- *         description: Matching products
- */
-router.get("/search", async (req, res) => {
-    const { q } = req.query;
-    const products = await Product.find({
-        title: { $regex: q, $options: "i" }//regex makes search flexible and not case-sensitive
-    });
     res.json(products);
 });
 
@@ -100,6 +74,9 @@ router.get("/count/:userId", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+
+
 /**
  * @swagger
  * /api/products/user/{id}:
@@ -185,6 +162,8 @@ router.get("/:id", async (req, res) => {//get by id
         })
     }
 })
+
+
 
 
 /**
