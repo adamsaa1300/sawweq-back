@@ -102,6 +102,44 @@ router.get("/count/:userId", async (req, res) => {
 });
 /**
  * @swagger
+ * /api/products/user/{id}:
+ *   get:
+ *     summary: Get all products created by a specific user
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User products retrieved successfully
+ *       500:
+ *         description: Server error
+ */
+router.get("/user/:id", async (req, res) => {//for user profile
+
+    try {
+
+        const products = await Product.find({
+            user: req.params.id
+        });
+
+        res.json(products);
+
+    } catch (err) {
+
+        res.status(500).json({
+            error: err.message
+        });
+
+    }
+
+});
+/**
+ * @swagger
  * /api/products/{id}:
  *   get:
  *     summary: Get product by ID
@@ -119,6 +157,19 @@ router.get("/count/:userId", async (req, res) => {
  *       404:
  *         description: Product not found
  */
+router.get("/user/:userId", async (req, res) => {
+  try {
+    const products = await Product.find({
+      user: req.params.userId,
+    });
+
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
 router.get("/:id", async (req, res) => {//get by id
     try {
         const product = await Product.findById(req.params.id)

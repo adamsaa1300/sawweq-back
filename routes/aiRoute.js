@@ -10,21 +10,21 @@ const hf = new HfInference(process.env.HF_TOKEN);
 /**
  * @swagger
  * /api/ai/improve-description:
- * post:
- * summary: Elevate and Improve ad descriptions to Professional English
- * tags: [AI]
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * description:
- * type: string
- * responses:
- * 200:
- * description: Successfully generated professional English ad
+ *   post:
+ *     summary: Elevate and Improve ad descriptions to Professional English
+ *     tags: [AI]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successfully generated professional English ad
  */
 
 router.post('/improve-description', async (req, res) => {
