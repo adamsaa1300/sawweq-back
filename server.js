@@ -35,14 +35,14 @@ const options = {
 const specs = swaggerJsdoc(options)
 
 // public routes
-app.use('/api/auth',     require('./routes/auth'))
+
 app.use('/api/products', require('./routes/products'))
 app.use('/api/ai',       require('./routes/aiRoute'))
 app.use('/uploads',      express.static(path.join(__dirname, 'uploads')))
 app.use('/api-docs',     swaggerUi.serve, swaggerUi.setup(specs))
 
 // protected routes
-app.use('/api/users',    protect, require('./routes/users'))
+app.use('/api/users', require('./routes/users'))
 app.use('/api/ads',      protect, require('./routes/create_ads'))
 app.use('/api/reports',  protect, require('./routes/reports'))
 app.use('/api/chats',    protect, require('./routes/chats'))
