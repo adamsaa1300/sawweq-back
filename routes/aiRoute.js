@@ -10,21 +10,21 @@ const hf = new HfInference(process.env.HF_TOKEN);
 /**
  * @swagger
  * /api/ai/improve-description:
- * post:
- * summary: Elevate and Improve ad descriptions to Professional English
- * tags: [AI]
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * description:
- * type: string
- * responses:
- * 200:
- * description: Successfully generated professional English ad
+ *   post:
+ *     summary: Improve ad descriptions in Arabic or English based on user input
+ *     tags: [AI]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successfully generated improved ad description
  */
 
 router.post('/improve-description', async (req, res) => {
@@ -35,28 +35,40 @@ router.post('/improve-description', async (req, res) => {
             return res.status(400).json({ error: "Description is required" });
         }
 
+        const isArabic = /[\u0600-\u06FF]/.test(description);
+
+        const languageInstruction = isArabic
+            ? "The input is Arabic. Rewrite and improve it in Arabic ONLY. Do not translate it to English or any other language."
+            : "The input is English. Rewrite and improve it in English ONLY. Do not translate it to Arabic, Chinese, or any other language.";
+
         const response = await hf.chatCompletion({
-            model: "Qwen/Qwen2.5-7B-Instruct", 
+            model: "Qwen/Qwen2.5-7B-Instruct",
             messages: [
-                { 
-                    role: "system", 
-                content: `Expert Copywriter Mode:
-                        - Target: University students.
-                        - Style: Modern, premium, catchy, and high-end.
-                        - STRICT LIMIT: Maximum 200 words.
-                        - Tone: Clean, persuasive, and social-media friendly.
-                        - Emojis: Use a few relevant vibrant emojis naturally.
-                        - Keywords to include when suitable: Premium, Pristine, Elevate.
-                        - Focus on making the product feel valuable, trendy, and student-friendly.
-                        - Output ONLY the final generated text without explanations, titles, or quotation marks.`          
+                {
+                    role: "system",
+                    content: `
+You are a professional ad copywriter.
+
+${languageInstruction}
+
+Rules:
+- Keep the SAME language as the user's input.
+- Never use Chinese characters.
+- Never mix languages.
+- Improve the text to sound modern, premium, catchy, and social-media friendly.
+- Target university students.
+- Use 1 to 3 relevant emojis naturally.
+- Maximum 200 words.
+- Return ONLY the improved ad text.
+`
                 },
-                { 
-                    role: "user", 
-                    content: `Enhance and rewrite this ad in professional English: ${description}` 
+                {
+                    role: "user",
+                    content: description
                 }
             ],
-            max_tokens: 700,
-            temperature: 0.8, 
+            max_tokens: 250,
+            temperature: 0.6,
         });
 
         const cleanText = response.choices[0].message.content.trim();
