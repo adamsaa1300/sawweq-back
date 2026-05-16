@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
  */
 router.post('/', async (req, res) => {//used in cards ptoducts
     try {
-        const { title, desc, tag,type } = req.body
+        const { title, desc, tag,type, productId  } = req.body
 
         if (!title || !tag) {
             return res.status(400).json({ error: 'Title and tag are required' })
@@ -64,7 +64,7 @@ router.post('/', async (req, res) => {//used in cards ptoducts
             return res.status(400).json({ error: 'Invalid tag value' })
         }
 
-        const report = new Report({ title, desc, tag,type, status: 'pending' })
+        const report = new Report({ title, desc, tag,type,  productId,status: 'pending' })
         await report.save()
 
         console.log("REPORT SAVED")
