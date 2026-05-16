@@ -44,7 +44,7 @@ app.use('/api-docs',     swaggerUi.serve, swaggerUi.setup(specs))
 // protected routes
 app.use('/api/users', require('./routes/users'))
 app.use('/api/ads',      protect, require('./routes/create_ads'))
-app.use('/api/reports',  protect, require('./routes/reports'))
+app.use('/api/reports', require('./routes/reports'))
 app.use('/api/chats',    protect, require('./routes/chats'))
 app.use('/api/admin',    protect, require('./routes/admin'))
 
