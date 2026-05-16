@@ -246,6 +246,66 @@ router.delete('/:id', async (req, res) => {
     }
 
 })
-
+/**
+ * @swagger
+ * /api/users/google-login:
+ *   post:
+ *     summary: Login/Register with Google
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Google login successful
+ *       500:
+ *         description: Server error
+ */
+router.post('/google-login', async (req, res) => {
+    try {
+        const { name, email } = req.body
+        let user = await User.findOne({ email })
+        if (!user) {
+            user = new User({
+                name,
+                email,
+                password: "google-login",
+                role: "user"
+            })
+            await user.save()
+        }
+        const token = jwt.sign(
+            {
+                id: user._id,
+                role: user.role
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "5h"
+            }
+        )
+        res.json({
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        })
+    } catch (err) {
+        res.status(500).json({
+            error: err.message
+        })
+    }
+})
 
 module.exports = router

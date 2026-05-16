@@ -6,10 +6,10 @@ const mongoose = require('mongoose')
  */
 const userSchema = new mongoose.Schema({
     name:      { type: String, required: true },              // full name
-    birthDate: { type: Date, required: true },                // date of birth
-    location:  { type: String, required: true },              // user location
-    faculty:   { type: String, required: true },              // faculty name
-    uni:       { type: String, required: true },              // university name
+    birthDate: { type: Date,default: null},                // date of birth
+    location:  { type: String,default: ""},              // user location
+    faculty:   { type: String,default: ""},              // faculty name
+    uni:       { type: String ,default: ""},              // university name
     email:     { type: String, required: true, unique: true, lowercase: true, trim: true }, // unique email
     password:  { type: String, required: true },              // hashed password
     status:    { type: String, default: 'active' },           // active | suspended | banned
