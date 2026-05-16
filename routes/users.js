@@ -87,6 +87,8 @@ router.post('/', async (req, res) => {//create a user //used in register
                 id: user._id,
                 name: user.name,
                 email: user.email,
+                birthDate: user.birthDate,
+                location: user.location,
                 faculty: user.faculty,
                 uni: user.uni,
                 role: user.role
@@ -155,6 +157,8 @@ router.post('/login', async (req, res) => {//used in log in page //email and pas
                 id: user._id,
                 name: user.name,
                 email: user.email,
+                birthDate: user.birthDate,
+                location: user.location,
                 faculty: user.faculty,
                 uni: user.uni,
                 role: user.role
@@ -189,27 +193,38 @@ router.post('/login', async (req, res) => {//used in log in page //email and pas
  *       404:
  *         description: User not found
  */
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
+
     try {
-        const user = await User.findById(req.params.id)
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' })
-        }
 
-        const allowedStatus = ['active', 'suspended', 'banned']
-        if (req.body.status && !allowedStatus.includes(req.body.status)) {
-            return res.status(400).json({ error: 'Invalid status value' })
-        }
+        const updatedUser = await User.findByIdAndUpdate(
 
-        const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true })
-        res.json(updated)
+            req.params.id,
+
+            {
+                name: req.body.name,
+                email: req.body.email,
+                location: req.body.location,
+                faculty: req.body.faculty,
+                uni: req.body.uni,
+                bio: req.body.bio,
+            },
+
+            { new: true }
+
+        );
+
+        res.json(updatedUser);
+
     } catch (err) {
+
         res.status(500).json({
             error: err.message
-        })
-    }
-})
+        });
 
+    }
+
+});
 /**
  * @swagger
  * /api/users/{id}:

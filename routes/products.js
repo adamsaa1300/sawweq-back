@@ -74,6 +74,9 @@ router.get("/count/:userId", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+
+
 /**
  * @swagger
  * /api/products/{id}:
@@ -108,6 +111,8 @@ router.get("/:id", async (req, res) => {//get by id
         })
     }
 })
+
+
 
 
 /**
