@@ -95,9 +95,10 @@ router.post('/', async (req, res) => {//create a user //used in register
             email,
             password
         } = req.body
-
+        const cleanEmail =
+            email.trim();
         const existingUser = await User.findOne({
-            email
+            email: cleanEmail
         })
 
         if (existingUser) {
@@ -120,7 +121,7 @@ router.post('/', async (req, res) => {//create a user //used in register
             location,
             faculty,
             uni,
-            email,
+            email: cleanEmail,
             password: hashedPassword,
             role: "user"
 
@@ -201,7 +202,11 @@ router.post('/login', async (req, res) => {//used in log in page //email and pas
 
     try {
 
-        const { email, password } = req.body
+        const email =
+            req.body.email.trim();
+
+        const password =
+            req.body.password;
 
         const user = await User.findOne({
             email
