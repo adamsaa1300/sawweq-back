@@ -5,6 +5,7 @@ const path = require('path')
 const protect = require('./middleware/auth')
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
+const productChatRoutes = require("./routes/productChatRoutes");
 require('dotenv').config()
 
 const app = express()
@@ -40,6 +41,7 @@ app.use('/api/products', require('./routes/products'))
 app.use('/api/ai',       require('./routes/aiRoute'))
 app.use('/uploads',      express.static(path.join(__dirname, 'uploads')))
 app.use('/api-docs',     swaggerUi.serve, swaggerUi.setup(specs))
+app.use("/api/product-chats", productChatRoutes);
 
 // protected routes
 app.use('/api/users', require('./routes/users'))
