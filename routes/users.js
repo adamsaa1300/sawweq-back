@@ -379,12 +379,12 @@ router.put("/:id", auth, async (req, res) => {
                 location: req.body.location,
                 faculty: req.body.faculty,
                 uni: req.body.uni,
-                bio: req.body.bio,
+                birthDate: req.body.birthDate,
             },
 
             { new: true }
 
-        )
+        ).select('-password')
 
         if (!updatedUser) {
 
@@ -553,7 +553,11 @@ router.post('/google-login', async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                uni: user.uni,
+                faculty: user.faculty,
+                location: user.location,
+                birthDate: user.birthDate,
             }
         })
     } catch (err) {
