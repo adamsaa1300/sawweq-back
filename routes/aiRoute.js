@@ -11,11 +11,7 @@ const hf = new HfInference(process.env.HF_TOKEN);
  * @swagger
  * /api/ai/improve-description:
  *   post:
-<<<<<<< HEAD
- *     summary: Elevate and Improve ad descriptions to Professional English
-=======
  *     summary: Improve ad descriptions in Arabic or English based on user input
->>>>>>> da908da754c41f8d3f36fb792f6808bffed118d8
  *     tags: [AI]
  *     requestBody:
  *       required: true
@@ -28,11 +24,7 @@ const hf = new HfInference(process.env.HF_TOKEN);
  *                 type: string
  *     responses:
  *       200:
-<<<<<<< HEAD
- *         description: Successfully generated professional English ad
-=======
  *         description: Successfully generated improved ad description
->>>>>>> da908da754c41f8d3f36fb792f6808bffed118d8
  */
 
 router.post('/improve-description', async (req, res) => {
