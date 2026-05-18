@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
 const auth = require("../middleware/auth")
+const admin = require("../middleware/admin")
 const multer = require("multer")
+const User = require("../models/User")
 const cloudinary = require("cloudinary").v2
 const { CloudinaryStorage } = require("multer-storage-cloudinary")
 
@@ -37,62 +39,45 @@ router.get("/", async (req, res) => {
     res.json(products);
 });
 
+
 /**
  * @swagger
- * /api/products/count/{userId}:
- * get:
- * summary: Get total number of ads created by a specific user
- * tags: [Ads]
- * parameters:
- * - in: path
- * name: userId
- * required: true
- * schema:
- * type: string
- * description: The ID of the user to count their ads
- * responses:
- * 200:
- * description: Total count retrieved successfully
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * count:
- * type: integer
- * example: 5
- * 500:
- * description: Server error
- */
-router.get("/count/:userId", async (req, res) => {
-  try {
-    const count = await Product.countDocuments({
-      user: req.params.userId,
-    });
-    res.json({ count });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-/**
- * @swagger
- * /api/products/{id}:
+ * /api/products/user/{id}:
  *   get:
- *     summary: Get product by ID
+ *     summary: Get all products created by a specific user
  *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: Product ID
+ *         description: User ID
  *     responses:
  *       200:
- *         description: Product found
- *       404:
- *         description: Product not found
+ *         description: User products retrieved successfully
+ *       500:
+ *         description: Server error
  */
+router.get("/user/:id", async (req, res) => {//for user profile
+
+    try {
+
+        const products = await Product.find({
+            user: req.params.id
+        });
+
+        res.json(products);
+
+    } catch (err) {
+
+        res.status(500).json({
+            error: err.message
+        });
+
+    }
+
+});
 router.get("/:id", async (req, res) => {//get by id
     try {
         const product = await Product.findById(req.params.id)
@@ -108,6 +93,8 @@ router.get("/:id", async (req, res) => {//get by id
         })
     }
 })
+
+
 
 
 /**
@@ -142,12 +129,13 @@ router.get("/:id", async (req, res) => {//get by id
 router.post("/", auth, upload.array("images", 8), async (req, res) => {
     try {
         const imagePaths = req.files ? req.files.map(file => file.path) : [];
+        const user = await User.findById(req.user.id)
         const product = new Product({
             ...req.body,
             user: req.user.id,
-            userName: req.body.userName,
+            userName: user.name,
             images: imagePaths,
-            status: "active"
+            status: "available"
         });
         await product.save();
         res.status(201).json(product);
@@ -182,6 +170,28 @@ router.post("/", auth, upload.array("images", 8), async (req, res) => {
  */
 router.put("/:id", auth, async (req, res) => {//update
     try {
+        const existingProduct =
+            await Product.findById(req.params.id)
+
+        if (!existingProduct) {
+
+            return res.status(404).json({
+                error: "Product not found"
+            });
+
+        }
+
+        if (
+            existingProduct.user.toString()
+            !== req.user.id &&
+            req.user.role !== "admin"
+        ) {
+
+            return res.status(403).json({
+                error: "Unauthorized"
+            });
+
+        }
         const product = await Product.findByIdAndUpdate(
             req.params.id,
             req.body,
@@ -224,6 +234,28 @@ router.put("/:id", auth, async (req, res) => {//update
  */
 router.delete("/:id", auth, async (req, res) => {//delete by id
     try {
+        const existingProduct =
+            await Product.findById(req.params.id)
+
+        if (!existingProduct) {
+
+            return res.status(404).json({
+                error: "Product not found"
+            });
+
+        }
+
+        if (
+            existingProduct.user.toString()
+            !== req.user.id &&
+            req.user.role !== "admin"
+        ) {
+
+            return res.status(403).json({
+                error: "Unauthorized"
+            });
+
+        }
         const product = await Product.findByIdAndDelete(req.params.id)
         if (!product) {
             return res.status(404).json({
@@ -246,11 +278,15 @@ router.delete("/:id", auth, async (req, res) => {//delete by id
  *   delete:
  *     summary: Delete all products
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: All products deleted
+ *       403:
+ *         description: Admin only
  */
-router.delete("/", async (req, res) => {//delete all
+router.delete("/", auth,admin,async (req, res) => {//delete all
     try {
         await Product.deleteMany()
         res.json({
@@ -263,4 +299,24 @@ router.delete("/", async (req, res) => {//delete all
     }
 })
 
+
+router.get("/count/:id", async (req, res) => {
+
+    try {
+
+        const count = await Product.countDocuments({
+            user: req.params.id
+        });
+
+        res.json({ count });
+
+    } catch (err) {
+
+        res.status(500).json({
+            error: err.message
+        });
+
+    }
+
+});
 module.exports = router;
