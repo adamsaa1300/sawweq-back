@@ -78,6 +78,29 @@ router.get("/user/:id", async (req, res) => {//for user profile
     }
 
 });
+
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Get product by ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product retrieved successfully
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
 router.get("/:id", async (req, res) => {//get by id
     try {
         const product = await Product.findById(req.params.id)
@@ -106,22 +129,27 @@ router.get("/:id", async (req, res) => {//get by id
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *               description:
- *                 type: string
- *               price:
- *                 type: number
- *               category:
- *                 type: string
- *               location:
- *                 type: string
+ *   required: true
+ *   content:
+ *     multipart/form-data:
+ *       schema:
+ *         type: object
+ *         properties:
+ *           title:
+ *             type: string
+ *           description:
+ *             type: string
+ *           price:
+ *             type: number
+ *           category:
+ *             type: string
+ *           location:
+ *             type: string
+ *           images:
+ *             type: array
+ *             items:
+ *               type: string
+ *               format: binary
  *     responses:
  *       201:
  *         description: Product created successfully
@@ -299,7 +327,25 @@ router.delete("/", auth,admin,async (req, res) => {//delete all
     }
 })
 
-
+/**
+ * @swagger
+ * /api/products/count/{id}:
+ *   get:
+ *     summary: Get number of products for a specific user
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: Product count retrieved successfully
+ *       500:
+ *         description: Server error
+ */
 router.get("/count/:id", async (req, res) => {
 
     try {
