@@ -11,6 +11,25 @@ const jwt = require("jsonwebtoken")
 const auth = require("../middleware/auth")
 const admin = require("../middleware/admin")
 
+const multer = require("multer")
+const cloudinary = require("cloudinary").v2
+const { CloudinaryStorage } = require("multer-storage-cloudinary")
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
+
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: "sawweq_profiles",
+        allowed_formats: ["jpg", "png", "jpeg", "webp"]
+    }
+})
+
+const upload = multer({ storage })
 /**
  * @swagger
  * /api/users:
@@ -352,7 +371,7 @@ router.get("/:id", async (req, res) => {
  *       404:
  *         description: User not found
  */
-router.put("/:id", auth, async (req, res) => {
+         router.put("/:id", auth, upload.single("profileImage"), async (req, res) => {
 
     try {
 
@@ -380,6 +399,7 @@ router.put("/:id", auth, async (req, res) => {
                 faculty: req.body.faculty,
                 uni: req.body.uni,
                 birthDate: req.body.birthDate,
+                profileImage: req.file ? req.file.path : req.body.profileImage,
             },
 
             { new: true }

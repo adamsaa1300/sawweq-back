@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     password:  { type: String, required: true },              // hashed password
     status:    { type: String, default: 'active' },           // active | suspended | banned
     role:      { type: String, default: 'user' },             // user role
+  profileImage: { type: String, default: "" },
     ads:       { type: Number, default: 0 },                  // number of ads posted
 }, { timestamps: true })
 
